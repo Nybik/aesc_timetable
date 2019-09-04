@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import logging, telegram, datetime, pytz
 from prettytable import PrettyTable
 from telegram.ext import Updater, CommandHandler
