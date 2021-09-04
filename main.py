@@ -18,53 +18,53 @@ def get_date():
     return get_day().date()
 
 
-TOKEN = input("Input token: ")
-proxy_check = input("Has proxy? (y/n) ")
+TOKEN = "1980205298:AAEGbdS-Z9ooDFm9Sd736zcV7BWF8aoMY00"
+# proxy_check = input("Has proxy? (y/n) ")
 REQUEST_KWARGS = {}
 
-if proxy_check.lower() == 'y':
-    proxy_url = input("Input proxy url: ")  # with http://
-    REQUEST_KWARGS = {
-        'proxy_url': proxy_url
-    }
+# if proxy_check.lower() == 'y':
+#     proxy_url = input("Input proxy url: ")  # with http://
+#     REQUEST_KWARGS = {
+#         'proxy_url': proxy_url
+#     }
 
 RUSSIAN_FIRST = [
     '1-ый', '2-ой', '3-ий', '4-ый', '5-ый', '6-ой', '7-ой'
 ]
 TIME = [
-    '9:00-9:45', '9:50-10:35', '10:45-11:30', '11:50-12:35',
-    '12:45-13:30', '13:35-14:20', '14:50-15:35'
+    '9:30-10:50', '11.10-12.30', '13.00-14.20', '14.40-16.00', 
+    '16.20-17.40', '18.10-19.30', '19.40-21.00'
 ]
 WEEKDAYS = [
     'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'
 ]
 TIMETABLE = [
-    ["Всемир. история 23", "Литература 23", "Литература 23", "Алгебра 23",
-        "Алгебра 23", "ЛЕКЦИЯ Алгебра 39", "История России 23"],
-    ["---", "---", "Физ-ра", "Физ-ра", "Информатика 23/33",
-            "Информатика 23/33", "Английский"],
-    ["---", "Геометрия 23", "Геометрия 23", "ОБЖ 23",
-            "Русский 23/43", "Литература", "Физ прак"],
-    ["Английский", "Английский", "Обществознание",
-     "ЛЕКЦИЯ Инфа 39", "Физика 23", "Физика 23", "---"],
-    ["ЛЕКЦИЯ Анализ 29", "ЛЕКЦИЯ Геом. 29", "Анализ 23", "Анализ 23",
-     "История др. мира 23", "Биология 23", "Мат прак 23"],
-    ["Физика 23", "Физика 23", "ЛЕКЦИЯ Физика 39",
-     "ЛЕКЦИЯ Физика 39", "Химия 46", "---", "---"],
+    ["Англ", "Линал лекция", "Матан лекция", "Линал семинар", "---", "---", "---"],
+    ["ОИМП лекция", "Дискретка лекция", "---", "---", "---", "---", "---"],
+    ["ОИМП очно", "Дискретка очно", "Матан очно", "---", "Англ", "Англ", "---"],
+    ["ОИМП лекция", "(213-2) ОИМП", "(213-2) ОИМП", "---", "---", "---", "---"],
+    ["(213-1) Оимп очно", "Экономика", "---", "---", "Англ", "Англ", "---"],
+    ["---", "---", "---", "---", "---", "---", "---"],
     ["---", "---", "---", "---", "---", "---", "---"],
 ]
-PEOPLE = [
-    "Абрамов", "Абросимов", "Акимов", "Борщев", "Буркин", "Голубев",
-    "Дубровин", "Занин", "Захарченко", "Карпеев", "Кеба", "Кравчук",
-    "Лифарь", "Мацкевич", "Морозов", "Нестеренко", "Орлова", "Пустовалов",
-    "Родионов", "Свердлов", "Симонов", "Фролов", "Чинаева",
-    "Шайдурова", "Шалагин", "Шуклин"
-]
-FILE_SAVE = "duty.txt"
-PEOPLE_QUEUE = []
-MAX_PEOPLE_QUEUE = 20
+for i in range(len(TIMETABLE)):
+    while len(TIMETABLE[i]) > 1:
+        if TIMETABLE[i][-1] == "---":
+            del TIMETABLE[i][-1]
+        else:
+            break
+# PEOPLE = [
+#     "Абрамов", "Абросимов", "Акимов", "Борщев", "Буркин", "Голубев",
+#     "Дубровин", "Занин", "Захарченко", "Карпеев", "Кеба", "Кравчук",
+#     "Лифарь", "Мацкевич", "Морозов", "Нестеренко", "Орлова", "Пустовалов",
+#     "Родионов", "Свердлов", "Симонов", "Фролов", "Чинаева",
+#     "Шайдурова", "Шалагин", "Шуклин"
+# ]
+# FILE_SAVE = "duty.txt"
+# PEOPLE_QUEUE = []
+# MAX_PEOPLE_QUEUE = 20
 
-WRITE_CHANNEL = open(FILE_SAVE, "a+")
+# WRITE_CHANNEL = open(FILE_SAVE, "a+")
 
 ERROR_MSG = 'Неверно указаны параметры для команды'
 CMD_COOLDOWN = {}
@@ -97,11 +97,6 @@ def get_random():
 
 def get_last():
     return PEOPLE_QUEUE[-2:]
-
-
-for x in open(FILE_SAVE, "r+"):
-    for word in x.split():
-        add_people(word, save=False)
 
 
 def bot_message_actions(func):
@@ -143,6 +138,11 @@ def get_timetable(weekday):
         t.add_row([str(i + 1), TIMETABLE[weekday % 7][i]])
     return str(t)
 
+def get_time_timetable(weekday):
+    t = PrettyTable(['Время', "Урок"])
+    for i in range(len(TIMETABLE[weekday % 7])):
+        t.add_row([TIME[i], TIMETABLE[weekday % 7][i]])
+    return str(t)
 
 def get_time():
     t = PrettyTable(['№', "Время"])
@@ -165,11 +165,21 @@ def cmd_tomorrow(update, context):
 
 @bot_message_actions
 def cmd_any(update, context):
-    if (len(context.args) < 1) or not (context.args[0].isdigit()):
+
+    valid_arg = {WEEKDAYS[i].lower() : i for i in range(len(WEEKDAYS))}
+    valid_arg.update({str(i + 1) : i for i in range(0, 7)})
+
+    if (len(context.args) < 1):
         context.bot.send_message(
             chat_id=update.message.chat_id, text=ERROR_MSG)
         return
-    weekday = max(0, int(context.args[0]) - 1)
+
+    if context.args[0].lower() not in valid_arg:
+        context.bot.send_message(
+            chat_id=update.message.chat_id, text=ERROR_MSG)
+        return
+
+    weekday = max(0, valid_arg[context.args[0].lower()])
     context.bot.send_message(chat_id=update.message.chat_id, text=("Расписание на {}\n<pre>" +
                                                                    get_timetable(weekday) + "</pre>").format(WEEKDAYS[weekday]), parse_mode=telegram.ParseMode.HTML)
 
@@ -179,29 +189,35 @@ def cmd_time(update, context):
     context.bot.send_message(chat_id=update.message.chat_id, text="<pre>" +
                              get_time() + "</pre>", parse_mode=telegram.ParseMode.HTML)
 
+@bot_message_actions
+def cmd_time_today(update, context):
+    context.bot.send_message(chat_id=update.message.chat_id, text="<pre>" + get_time_timetable(
+        get_day().weekday()) + "</pre>", parse_mode=telegram.ParseMode.HTML)
 
 @bot_message_actions
-def cmd_clear(update, context):
-    global LAST_DAY_USAGE
+def cmd_time_tomorrow(update, context):
+    context.bot.send_message(chat_id=update.message.chat_id, text="<pre>" + get_time_timetable(
+        get_day().weekday() + 1) + "</pre>", parse_mode=telegram.ParseMode.HTML)
 
-    if LAST_DAY_USAGE == get_date():
-        context.bot.send_message(chat_id=update.message.chat_id,
-                                 text="Дежурные на сегодня - {0[0]} и {0[1]}.".format(get_last()))
+@bot_message_actions
+def cmd_time_any(update, context):
+
+    valid_arg = {WEEKDAYS[i].lower() : i for i in range(len(WEEKDAYS))}
+    valid_arg.update({str(i + 1) : i for i in range(0, 7)})
+
+    if (len(context.args) < 1):
+        context.bot.send_message(
+            chat_id=update.message.chat_id, text=ERROR_MSG)
         return
-    if get_date().weekday() == 6:
-        context.bot.send_message(chat_id=update.message.chat_id,
-                                 text="Дядь ты дурак? Сегодня воскресенье")
+
+    if context.args[0].lower() not in valid_arg:
+        context.bot.send_message(
+            chat_id=update.message.chat_id, text=ERROR_MSG)
         return
 
-    FIRST = get_random()
-    SECOND = get_random()
-
-    context.bot.send_message(chat_id=update.message.chat_id,
-                             text="Поздравялем счастливчиков!\nДежурные на сегодня - {} и {}.".format(FIRST, SECOND))
-
-    LAST_DAY_USAGE = get_date()
-    return
-
+    weekday = max(0, valid_arg[context.args[0].lower()])
+    context.bot.send_message(chat_id=update.message.chat_id, text=("Расписание на {}\n<pre>" +
+                                                                   get_time_timetable(weekday) + "</pre>").format(WEEKDAYS[weekday]), parse_mode=telegram.ParseMode.HTML)
 
 def addCommand(updater, name, function, cooldown=5):
     global CMD_COOLDOWN, CMD_LAST_USAGE
@@ -212,13 +228,13 @@ def addCommand(updater, name, function, cooldown=5):
 
     updater.dispatcher.add_handler(CommandHandler(name, function))
 
-# print(cmd_today.__name__)
-
 addCommand(updater, ["today"], cmd_today)
 addCommand(updater, ["tomorrow"], cmd_tomorrow)
 addCommand(updater, ["time"], cmd_time)
 addCommand(updater, ["any"], cmd_any)
-addCommand(updater, ["clear"], cmd_clear)
+addCommand(updater, ["t_today"], cmd_time_today)
+addCommand(updater, ["t_tomorrow"], cmd_time_tomorrow)
+addCommand(updater, ["t_any"], cmd_time_any)
 
 updater.start_polling()
 logging.info("Bot: {} has started".format(
