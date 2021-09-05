@@ -46,7 +46,7 @@ WEEKDAYS = [
     'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'
 ]
 TIMETABLE = [
-    ["Англ", f"<a href={llinal_link}>(Л) Линал</a>", f"<a href={lcalc_link}>(Л) Матан</a>", f"<a href={slinear_link}>(С) Линал</a>"],
+    ["Англ", "(Л) Линал", "(Л) Матан", "(С) Линал"],
     ["(Л) ОИМП", "(Л) Дискретка", "---", "---", "---", "---", "---"],
     ["(С+) ОИМП 213-1", "(С+) Дискретка", "(С) Матан", "---", "Англ", "Англ", "---"],
     ["(Л) ОИМП", "(С) ОИМП 213-2", "(С) ОИМП 213-2", "---", "---", "---", "---"],
@@ -60,6 +60,12 @@ for i in range(len(TIMETABLE)):
             del TIMETABLE[i][-1]
         else:
             break
+
+link_mapper = {
+    "(Л) Линал": f"</code><a href={llinal_link}>(Л) Линал</a><code> ",
+    "(Л) Матан": f"</code><a href={lcalc_link}>(Л) Матан</a><code> ",
+    "(С) Линал": f"</code><a href={slinear_link}>(С) Линал</a><code> ",
+}
 
 ERROR_MSG = 'Неверно указаны параметры для команды'
 CMD_COOLDOWN = {}
@@ -103,26 +109,33 @@ def bot_message_actions(func):
     return set_main_action
 
 
+def parse(table):
+    for name, link_name in link_mapper.items():
+        table = table.replace(name, link_name)
+    return table
+
 def get_timetable(weekday):
     t = PrettyTable(['№', "Урок"])
     for i in range(len(TIMETABLE[weekday % 7])):
         t.add_row([str(i + 1), TIMETABLE[weekday % 7][i]])
-    return html.unescape(t.get_html_string(format=True))
+    return parse(t.get_string())
 
 def get_time_timetable(weekday):
     t = PrettyTable(['Время', "Урок"])
     for i in range(len(TIMETABLE[weekday % 7])):
         t.add_row([TIME[i], TIMETABLE[weekday % 7][i]])
-    return html.unescape(t.get_html_string(format=True))
+    return parse(t.get_string())
 
 def get_time():
     t = PrettyTable(['№', "Время"])
     for i in range(len(TIME)):
         t.add_row([str(i + 1), TIME[i]])
-    return html.unescape(t.get_html_string(format=True))
+    return parse(t.get_string())
+
 
 def reply(update, context, msg):
-    context.bot.send_message(chat_id=update.message.chat_id, text=msg, parse_mode=telegram.ParseMode.HTML)
+    context.bot.send_message(chat_id=update.message.chat_id, text=msg, parse_mode=telegram.ParseMode.HTML, 
+        disable_web_page_preview=True)
 
 @bot_message_actions
 def cmd_today(update, context):
@@ -150,19 +163,19 @@ def cmd_any(update, context):
 
     weekday = max(0, valid_arg[context.args[0].lower()])
 
-    reply(update, context, "Расписание на {}\n<pre>{}</pre>".format(WEEKDAYS[weekday], get_timetable(weekday)))
+    reply(update, context, "Расписание на {}\n<code>{}</code>".format(WEEKDAYS[weekday], get_timetable(weekday)))
 
 @bot_message_actions
 def cmd_time(update, context):
-    reply(update, context, "<pre>{}</pre>".format(get_time()))
+    reply(update, context, "<code>{}</code>".format(get_time()))
 
 @bot_message_actions
 def cmd_time_today(update, context):
-    reply(update, context, "<pre>{}</pre>".format(get_time_timetable(get_weekday())))
+    reply(update, context, "<code>{}</code>".format(get_time_timetable(get_weekday())))
 
 @bot_message_actions
 def cmd_time_tomorrow(update, context):
-    reply(update, context, "<pre>{}</pre>".format(get_time_timetable(get_weekday() + 1)))
+    reply(update, context, "<code>{}</code>".format(get_time_timetable(get_weekday() + 1)))
 
 @bot_message_actions
 def cmd_time_any(update, context):
@@ -182,7 +195,7 @@ def cmd_time_any(update, context):
 
     weekday = max(0, valid_arg[context.args[0].lower()])
 
-    reply(update, context, "Расписание на {}\n<pre>{}</pre>".format(WEEKDAYS[weekday], get_time_timetable(weekday)))
+    reply(update, context, "Расписание на {}\n<code>{}</code>".format(WEEKDAYS[weekday], get_time_timetable(weekday)))
 
 def addCommand(updater, name, function, cooldown=5):
     global CMD_COOLDOWN, CMD_LAST_USAGE
