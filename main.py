@@ -31,9 +31,9 @@ REQUEST_KWARGS = {}
 #     REQUEST_KWARGS = {
 #         'proxy_url': proxy_url
 #     }
-llinal_link = "https://zoom.us/j/93730511689?pwd=M1I1UTZRT1p1bjJIWk1SeG9hQWZEUT09"
-lcalc_link = "https://zoom.us/j/91788164166"
-slinear_link = "https://zoom.us/j/98331733150?pwd=MWpaMjBHT3VkYW1obldHSXVXSytFdz09"
+llinal_link = "\'https://zoom.us/j/93730511689?pwd=M1I1UTZRT1p1bjJIWk1SeG9hQWZEUT09\'"
+lcalc_link = "\'https://zoom.us/j/91788164166\'"
+slinear_link = "\'https://zoom.us/j/98331733150?pwd=MWpaMjBHT3VkYW1obldHSXVXSytFdz09\'"
 RUSSIAN_FIRST = [
     '1-ый', '2-ой', '3-ий', '4-ый', '5-ый', '6-ой', '7-ой'
 ]
@@ -125,11 +125,11 @@ def reply(update, context, msg):
 
 @bot_message_actions
 def cmd_today(update, context):
-    reply(update, context, "<pre>{}<pre>".format(get_timetable(get_weekday())))
+    reply(update, context, "<pre>{}</pre>".format(get_timetable(get_weekday())))
 
 @bot_message_actions
 def cmd_tomorrow(update, context):
-    reply(update, context, "<pre>{}<pre>".format(get_timetable(get_weekday() + 1)))
+    reply(update, context, "<pre>{}</pre>".format(get_timetable(get_weekday() + 1)))
 
 @bot_message_actions
 def cmd_any(update, context):
@@ -153,15 +153,15 @@ def cmd_any(update, context):
 
 @bot_message_actions
 def cmd_time(update, context):
-    reply(update, context, "<pre>{}<pre>".format(get_time()))
+    reply(update, context, "<pre>{}</pre>".format(get_time()))
 
 @bot_message_actions
 def cmd_time_today(update, context):
-    reply(update, context, "<pre>{}<pre>".format(get_time_timetable(get_weekday())))
+    reply(update, context, "<pre>{}</pre>".format(get_time_timetable(get_weekday())))
 
 @bot_message_actions
 def cmd_time_tomorrow(update, context):
-    reply(update, context, "<pre>{}<pre>".format(get_time_timetable(get_weekday() + 1)))
+    reply(update, context, "<pre>{}</pre>".format(get_time_timetable(get_weekday() + 1)))
 
 @bot_message_actions
 def cmd_time_any(update, context):
