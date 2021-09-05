@@ -139,11 +139,11 @@ def reply(update, context, msg):
 
 @bot_message_actions
 def cmd_today(update, context):
-    reply(update, context, "<pre>{}</pre>".format(get_timetable(get_weekday())))
+    reply(update, context, "<code>{}</code>".format(get_timetable(get_weekday())))
 
 @bot_message_actions
 def cmd_tomorrow(update, context):
-    reply(update, context, "<pre>{}</pre>".format(get_timetable(get_weekday() + 1)))
+    reply(update, context, "<code>{}</code>".format(get_timetable(get_weekday() + 1)))
 
 @bot_message_actions
 def cmd_any(update, context):
