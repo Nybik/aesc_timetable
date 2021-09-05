@@ -6,6 +6,7 @@ import datetime
 import pytz
 import telegram
 import random
+import html
 from functools import wraps
 from time import time
 from prettytable import PrettyTable
@@ -106,19 +107,19 @@ def get_timetable(weekday):
     t = PrettyTable(['№', "Урок"])
     for i in range(len(TIMETABLE[weekday % 7])):
         t.add_row([str(i + 1), TIMETABLE[weekday % 7][i]])
-    return str(t)
+    return html.unescape(t.get_html_string(format=True))
 
 def get_time_timetable(weekday):
     t = PrettyTable(['Время', "Урок"])
     for i in range(len(TIMETABLE[weekday % 7])):
         t.add_row([TIME[i], TIMETABLE[weekday % 7][i]])
-    return str(t)
+    return html.unescape(t.get_html_string(format=True))
 
 def get_time():
     t = PrettyTable(['№', "Время"])
     for i in range(len(TIME)):
         t.add_row([str(i + 1), TIME[i]])
-    return str(t)
+    return html.unescape(t.get_html_string(format=True))
 
 def reply(update, context, msg):
     context.bot.send_message(chat_id=update.message.chat_id, text=msg, parse_mode=telegram.ParseMode.HTML)
