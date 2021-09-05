@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import logging
+import os
 import datetime
 import pytz
 import telegram
@@ -17,8 +18,11 @@ def get_day():
 def get_date():
     return get_day().date()
 
+def get_weekday():
+    return get_day().get_weekday()
 
-TOKEN = "1980205298:AAEGbdS-Z9ooDFm9Sd736zcV7BWF8aoMY00"
+
+TOKEN = os.environ.get('TOKEN')
 # proxy_check = input("Has proxy? (y/n) ")
 REQUEST_KWARGS = {}
 
@@ -27,7 +31,9 @@ REQUEST_KWARGS = {}
 #     REQUEST_KWARGS = {
 #         'proxy_url': proxy_url
 #     }
-
+llinal_link = "https://zoom.us/j/93730511689?pwd=M1I1UTZRT1p1bjJIWk1SeG9hQWZEUT09"
+lcalc_link = "https://zoom.us/j/91788164166"
+slinear_link = "https://zoom.us/j/98331733150?pwd=MWpaMjBHT3VkYW1obldHSXVXSytFdz09"
 RUSSIAN_FIRST = [
     '1-ый', '2-ой', '3-ий', '4-ый', '5-ый', '6-ой', '7-ой'
 ]
@@ -39,11 +45,11 @@ WEEKDAYS = [
     'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'
 ]
 TIMETABLE = [
-    ["Англ", "Линал лекция", "Матан лекция", "Линал семинар", "---", "---", "---"],
-    ["ОИМП лекция", "Дискретка лекция", "---", "---", "---", "---", "---"],
-    ["ОИМП очно", "Дискретка очно", "Матан очно", "---", "Англ", "Англ", "---"],
-    ["ОИМП лекция", "(213-2) ОИМП", "(213-2) ОИМП", "---", "---", "---", "---"],
-    ["(213-1) Оимп очно", "Экономика", "---", "---", "Англ", "Англ", "---"],
+    ["Англ", f"<a href={llinal_link}>(Л) Линал</a>", f"<a href={lcalc_link}>(Л) Матан</a>", f"<a href={slinear_link}>(С) Линал</a>"],
+    ["(Л) ОИМП", "(Л) Дискретка", "---", "---", "---", "---", "---"],
+    ["(С+) ОИМП 213-1", "(С+) Дискретка", "(С) Матан", "---", "Англ", "Англ", "---"],
+    ["(Л) ОИМП", "(С) ОИМП 213-2", "(С) ОИМП 213-2", "---", "---", "---", "---"],
+    ["(С+) Оимп 231-1", "(С+) Экономика", "---", "---", "Англ", "Англ", "---"],
     ["---", "---", "---", "---", "---", "---", "---"],
     ["---", "---", "---", "---", "---", "---", "---"],
 ]
@@ -53,51 +59,15 @@ for i in range(len(TIMETABLE)):
             del TIMETABLE[i][-1]
         else:
             break
-# PEOPLE = [
-#     "Абрамов", "Абросимов", "Акимов", "Борщев", "Буркин", "Голубев",
-#     "Дубровин", "Занин", "Захарченко", "Карпеев", "Кеба", "Кравчук",
-#     "Лифарь", "Мацкевич", "Морозов", "Нестеренко", "Орлова", "Пустовалов",
-#     "Родионов", "Свердлов", "Симонов", "Фролов", "Чинаева",
-#     "Шайдурова", "Шалагин", "Шуклин"
-# ]
-# FILE_SAVE = "duty.txt"
-# PEOPLE_QUEUE = []
-# MAX_PEOPLE_QUEUE = 20
-
-# WRITE_CHANNEL = open(FILE_SAVE, "a+")
 
 ERROR_MSG = 'Неверно указаны параметры для команды'
 CMD_COOLDOWN = {}
 CMD_LAST_USAGE = {}
 
-LAST_DAY_USAGE = get_date() - datetime.timedelta(days=1)
-
 logging.basicConfig(format='%(asctime)s - %(name)s - %(message)s',
                     level=logging.INFO)
+
 updater = Updater(token=TOKEN, use_context=True, request_kwargs=REQUEST_KWARGS)
-
-
-def arrange_queue():
-    while len(PEOPLE_QUEUE) > MAX_PEOPLE_QUEUE:
-        PEOPLE_QUEUE.pop(0)
-
-
-def add_people(name, save=True):
-    PEOPLE_QUEUE.append(name)
-    arrange_queue()
-    if save:
-        WRITE_CHANNEL.write(name + " ")
-        WRITE_CHANNEL.flush()
-    return name
-
-
-def get_random():
-    return add_people(random.sample(set(PEOPLE) - set(PEOPLE_QUEUE), 1)[0])
-
-
-def get_last():
-    return PEOPLE_QUEUE[-2:]
-
 
 def bot_message_actions(func):
     global CMD_LAST_USAGE
@@ -150,18 +120,16 @@ def get_time():
         t.add_row([str(i + 1), TIME[i]])
     return str(t)
 
+def reply(update, context, msg):
+    context.bot.send_message(chat_id=update.message.chat_id, text=msg, parse_mode=telegram.ParseMode.HTML)
 
 @bot_message_actions
 def cmd_today(update, context):
-    context.bot.send_message(chat_id=update.message.chat_id, text="<pre>" + get_timetable(
-        get_day().weekday()) + "</pre>", parse_mode=telegram.ParseMode.HTML)
-
+    reply(update, context, "<pre>{}<pre>".format(get_timetable(get_weekday())))
 
 @bot_message_actions
 def cmd_tomorrow(update, context):
-    context.bot.send_message(chat_id=update.message.chat_id, text="<pre>" + get_timetable(
-        get_day().weekday() + 1) + "</pre>", parse_mode=telegram.ParseMode.HTML)
-
+    reply(update, context, "<pre>{}<pre>".format(get_timetable(get_weekday() + 1)))
 
 @bot_message_actions
 def cmd_any(update, context):
@@ -180,24 +148,20 @@ def cmd_any(update, context):
         return
 
     weekday = max(0, valid_arg[context.args[0].lower()])
-    context.bot.send_message(chat_id=update.message.chat_id, text=("Расписание на {}\n<pre>" +
-                                                                   get_timetable(weekday) + "</pre>").format(WEEKDAYS[weekday]), parse_mode=telegram.ParseMode.HTML)
 
+    reply(update, context, "Расписание на {}\n<pre>{}</pre>".format(WEEKDAYS[weekday], get_timetable(weekday)))
 
 @bot_message_actions
 def cmd_time(update, context):
-    context.bot.send_message(chat_id=update.message.chat_id, text="<pre>" +
-                             get_time() + "</pre>", parse_mode=telegram.ParseMode.HTML)
+    reply(update, context, "<pre>{}<pre>".format(get_time()))
 
 @bot_message_actions
 def cmd_time_today(update, context):
-    context.bot.send_message(chat_id=update.message.chat_id, text="<pre>" + get_time_timetable(
-        get_day().weekday()) + "</pre>", parse_mode=telegram.ParseMode.HTML)
+    reply(update, context, "<pre>{}<pre>".format(get_time_timetable(get_weekday())))
 
 @bot_message_actions
 def cmd_time_tomorrow(update, context):
-    context.bot.send_message(chat_id=update.message.chat_id, text="<pre>" + get_time_timetable(
-        get_day().weekday() + 1) + "</pre>", parse_mode=telegram.ParseMode.HTML)
+    reply(update, context, "<pre>{}<pre>".format(get_time_timetable(get_weekday() + 1)))
 
 @bot_message_actions
 def cmd_time_any(update, context):
@@ -216,8 +180,8 @@ def cmd_time_any(update, context):
         return
 
     weekday = max(0, valid_arg[context.args[0].lower()])
-    context.bot.send_message(chat_id=update.message.chat_id, text=("Расписание на {}\n<pre>" +
-                                                                   get_time_timetable(weekday) + "</pre>").format(WEEKDAYS[weekday]), parse_mode=telegram.ParseMode.HTML)
+
+    reply(update, context, "Расписание на {}\n<pre>{}</pre>".format(WEEKDAYS[weekday], get_time_timetable(weekday)))
 
 def addCommand(updater, name, function, cooldown=5):
     global CMD_COOLDOWN, CMD_LAST_USAGE
@@ -232,9 +196,9 @@ addCommand(updater, ["today"], cmd_today)
 addCommand(updater, ["tomorrow"], cmd_tomorrow)
 addCommand(updater, ["time"], cmd_time)
 addCommand(updater, ["any"], cmd_any)
-addCommand(updater, ["t_today"], cmd_time_today)
-addCommand(updater, ["t_tomorrow"], cmd_time_tomorrow)
-addCommand(updater, ["t_any"], cmd_time_any)
+addCommand(updater, ["ttoday"], cmd_time_today)
+addCommand(updater, ["ttomorrow"], cmd_time_tomorrow)
+addCommand(updater, ["tany"], cmd_time_any)
 
 updater.start_polling()
 logging.info("Bot: {} has started".format(
