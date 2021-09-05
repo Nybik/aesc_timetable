@@ -19,7 +19,7 @@ def get_date():
     return get_day().date()
 
 def get_weekday():
-    return get_day().get_weekday()
+    return get_day().weekday()
 
 
 TOKEN = os.environ.get('TOKEN')
