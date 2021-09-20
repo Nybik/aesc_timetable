@@ -25,6 +25,7 @@ def get_weekday():
 
 TOKEN = os.environ.get('TOKEN')
 # proxy_check = input("Has proxy? (y/n) ")
+
 REQUEST_KWARGS = {}
 
 # if proxy_check.lower() == 'y':
